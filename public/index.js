@@ -46,7 +46,7 @@ form.addEventListener("submit", async (event) => {
 	}
 
 	const url = search(address.value, searchEngine.value);
-	const config = await fetch("/wispServer.json").then(r => r.json());
+	const config = await fetch("./wispServer.json").then(r => r.json());
 
 	let wispUrl = config.wispUrl
 	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
