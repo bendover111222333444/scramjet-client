@@ -12,7 +12,9 @@ const configPromise = fetch("/wispServer.json").then(r => r.json());
 let controller;
 
 (async () => {
-    const sw = await navigator.serviceWorker.register("/scram/controller.sw.js");
+    await navigator.serviceWorker.register("/controller/controller.sw.js", {
+        scope: "/",
+    });
     await navigator.serviceWorker.ready;
 
     controller = new $scramjetController.Controller({
@@ -22,7 +24,7 @@ let controller;
             prefix: "/scramjet/",
             scramjetPath: "/scram/",
             wasmPath: "/scram/scramjet.wasm",
-            injectPath: "/scram/controller.inject.js",
+            injectPath: "/controller/controller.inject.js",
             virtualWasmPath: "/scram/scramjet.wasm",
         },
     });

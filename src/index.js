@@ -1,16 +1,19 @@
-import { createServer } from "node:http";
-import { fileURLToPath } from "url";
-import { hostname } from "node:os";
 import { createRequire } from "node:module";
+import { dirname } from "node:path";
+import { fileURLToPath } from "url";
+import { createServer } from "node:http";
+import { hostname } from "node:os";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
-
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const require = createRequire(import.meta.url);
-const controllerPath = require.resolve("@mercuryworkshop/scramjet-controller").replace("/dist/controller-external.mjs", "/dist");
+
+const controllerPath = dirname(require.resolve("@mercuryworkshop/scramjet-controller/package.json")) + "/dist";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
