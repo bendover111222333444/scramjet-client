@@ -1,39 +1,34 @@
 "use strict";
-/**
- * @type {HTMLFormElement}
- */
+
 const form = document.getElementById("sj-form");
-/**
- * @type {HTMLInputElement}
- */
 const address = document.getElementById("sj-address");
-/**
- * @type {HTMLInputElement}
- */
 const searchEngine = document.getElementById("sj-search-engine");
-/**
- * @type {HTMLParagraphElement}
- */
 const error = document.getElementById("sj-error");
-/**
- * @type {HTMLPreElement}
- */
 const errorCode = document.getElementById("sj-error-code");
-
-const { ScramjetController } = $scramjetLoadController();
-
-const scramjet = new ScramjetController({
-    files: {
-        wasm: "/scram/scramjet.wasm.wasm",
-        all: "/scram/scramjet.all.js",
-        sync: "/scram/scramjet.sync.js",
-    },
-});
-
-scramjet.init();
 
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
+
+let controller;
+
+(async () => {
+    const sw = await navigator.serviceWorker.register("/scram/controller.sw.js");
+    await navigator.serviceWorker.ready;
+
+    controller = new $scramjetController.Controller({
+        serviceworker: (await navigator.serviceWorker.ready).active,
+        transport: connection,
+        config: {
+            prefix: "/scramjet/",
+            scramjetPath: "/scram/",
+            wasmPath: "/scram/scramjet.wasm",
+            injectPath: "/scram/controller.inject.js",
+            virtualWasmPath: "/scram/scramjet.wasm",
+        },
+    });
+
+    await controller.wait();
+})();
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -51,13 +46,12 @@ form.addEventListener("submit", async (event) => {
 
     await navigator.serviceWorker.ready;
 
-	await connection.setTransport("/libcurl/index.mjs", [
-		{ wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
-	]);
+    await connection.setTransport("/libcurl/index.mjs", [
+        { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
+    ]);
 
     const url = search(address.value, searchEngine.value);
-    const frame = scramjet.createFrame();
-    frame.frame.id = "sj-frame";
-    document.body.appendChild(frame.frame);
+    const frame = controller.createFrame();
+    document.body.appendChild(frame.element);
     frame.go(url);
 });
