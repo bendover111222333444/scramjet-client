@@ -21,7 +21,7 @@ const controllerPromise = (async () => {
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
-        transport: connection,
+        transport: { type: "baremux", connection },
         config: {
             prefix: "/scramjet/",
             scramjetPath: "/scram/",
