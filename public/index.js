@@ -15,17 +15,17 @@ const controllerPromise = (async () => {
     });
     await navigator.serviceWorker.ready;
 
-    const controller = new $scramjetController.Controller({
-        serviceworker: (await navigator.serviceWorker.ready).active,
-        transport: connection,
-        config: {
-            prefix: "/scramjet/",
-            scramjetPath: "/scram/",
-            wasmPath: "/scram/scramjet.wasm",
-            injectPath: "/controller/controller.inject.js",
-            virtualWasmPath: "/scram/scramjet.wasm",
-        },
-    });
+	const controller = new $scramjetController.Controller({
+		serviceworker: (await navigator.serviceWorker.ready).active,
+		transport: connection,
+		config: {
+			prefix: "/scramjet/",
+			scramjetPath: "/scram/",
+			wasmPath: "/scram/scramjet.wasm",
+			injectPath: "/controller/controller.inject.js",
+			virtualWasmPath: "/scram/scramjet.wasm",
+		},
+	});
 
     await controller.wait();
     return controller;
