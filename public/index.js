@@ -6,7 +6,7 @@ const searchEngine = document.getElementById("sj-search-engine");
 const error = document.getElementById("sj-error");
 const errorCode = document.getElementById("sj-error-code");
 
-const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+const connection = new BareMux.BareClient();
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
@@ -42,7 +42,7 @@ form.addEventListener("submit", async (event) => {
 
     const wispUrls = config.wispUrls;
 
-    await connection.setTransport("/libcurl/index.mjs", [
+    BareMux.SetTransport("/libcurl/index.mjs", [
         { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
     ]);
 
