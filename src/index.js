@@ -57,6 +57,16 @@ fastify.register(fastifyStatic, {
     decorateReply: false,
 });
 
+fastify.get("/scramjet/*", (request, reply) => {
+    reply.code(200).type("text/html").send(`<!DOCTYPE html><html><head><script>
+        if (navigator.serviceWorker.controller) {
+            location.reload();
+        } else {
+            navigator.serviceWorker.ready.then(() => location.reload());
+        }
+    </script></head><body></body></html>`);
+});
+
 fastify.setNotFoundHandler((res, reply) => {
     return reply.code(404).type("text/html").sendFile("404.html");
 });
