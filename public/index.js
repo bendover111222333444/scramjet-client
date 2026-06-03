@@ -42,16 +42,25 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const [config, controller] = await Promise.all([configPromise, controllerPromise]);
-    if (!controller) return;
+    console.log("controller:", controller);
+    console.log("config:", config);
+    
+    if (!controller) {
+        console.log("controller is undefined!");
+        return;
+    }
 
     const wispUrls = config.wispUrls;
+    console.log("wispUrls:", wispUrls);
 
     await connection.setTransport("/libcurl/index.mjs", [
         { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
     ]);
 
     const url = search(address.value, searchEngine.value);
+    console.log("url:", url);
     const frame = controller.createFrame();
+    console.log("frame:", frame);
     document.body.appendChild(frame.element);
     frame.go(url);
 });
