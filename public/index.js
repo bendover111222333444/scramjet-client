@@ -10,8 +10,7 @@ const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
-
-    const reg = await navigator.serviceWorker.register("/controller.sw.js", { scope: "/" });
+    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
     await navigator.serviceWorker.ready;
 
     if (!navigator.serviceWorker.controller) {
@@ -21,7 +20,7 @@ const controllerPromise = (async () => {
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
-        transport: { type: "baremux", connection },
+        transport: connection,
         config: {
             prefix: "/scramjet/",
             scramjetPath: "/scram/",
@@ -39,25 +38,16 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const [config, controller] = await Promise.all([configPromise, controllerPromise]);
-    console.log("controller:", controller);
-    console.log("config:", config);
-    
-    if (!controller) {
-        console.log("controller is undefined!");
-        return;
-    }
+    if (!controller) return;
 
     const wispUrls = config.wispUrls;
-    console.log("wispUrls:", wispUrls);
 
     await connection.setTransport("/libcurl/index.mjs", [
         { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
     ]);
 
     const url = search(address.value, searchEngine.value);
-    console.log("url:", url);
     const frame = controller.createFrame();
-    console.log("frame:", frame);
     document.body.appendChild(frame.element);
     frame.go(url);
 });

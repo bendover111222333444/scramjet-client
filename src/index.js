@@ -1,4 +1,3 @@
-import { createRequire } from "node:module";
 import { dirname } from "node:path";
 import { fileURLToPath } from "url";
 import { createServer } from "node:http";
@@ -9,12 +8,7 @@ import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const require = createRequire(import.meta.url);
-
 const controllerPath = fileURLToPath(new URL("../node_modules/@mercuryworkshop/scramjet-controller/dist", import.meta.url));
-
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
 const fastify = Fastify({
@@ -57,12 +51,18 @@ fastify.register(fastifyStatic, {
     decorateReply: false,
 });
 
-fastify.setNotFoundHandler((res, reply) => {
-    return reply.code(404).type("text/html").sendFile("404.html");
-});
-
 fastify.get("/controller.sw.js", (request, reply) => {
     reply.sendFile("controller.sw.js", controllerPath);
+});
+
+fastify.get("/scramjet/*", (request, reply) => {
+    reply.code(200).type("text/html").send(`<!DOCTYPE html><html><head><meta charset="utf-8"><script>
+        navigator.serviceWorker.ready.then(() => location.reload());
+    </script></head><body></body></html>`);
+});
+
+fastify.setNotFoundHandler((req, reply) => {
+    return reply.code(404).type("text/html").sendFile("404.html");
 });
 
 fastify.server.on("listening", () => {
