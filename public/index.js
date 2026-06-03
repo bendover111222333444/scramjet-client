@@ -10,26 +10,31 @@ const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
-   	await navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-    });
+    await navigator.serviceWorker.register("/controller/controller.sw.js", { scope: "/" });
+
+    if (!navigator.serviceWorker.controller) {
+        await new Promise(resolve => {
+            navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+        });
+        location.reload();
+        return;
+    }
+
     await navigator.serviceWorker.ready;
 
-	const controller = new $scramjetController.Controller({
-		serviceworker: (await navigator.serviceWorker.ready).active,
-		transport: connection,
-		config: {
-			prefix: "/scramjet/",
-			scramjetPath: "/scram/",
-			wasmPath: "/scram/scramjet.wasm",
-			injectPath: "/controller/controller.inject.js",
-			virtualWasmPath: "/scram/scramjet.wasm",
-		},
-	});
+    const controller = new $scramjetController.Controller({
+        serviceworker: (await navigator.serviceWorker.ready).active,
+        transport: connection,
+        config: {
+            prefix: "/scramjet/",
+            scramjetPath: "/scram/",
+            wasmPath: "/scram/scramjet.wasm",
+            injectPath: "/controller/controller.inject.js",
+            virtualWasmPath: "/scram/scramjet.wasm",
+        },
+    });
 
     await controller.wait();
-	await new Promise(resolve => setTimeout(resolve, 500));
-	
     return controller;
 })();
 
@@ -37,6 +42,8 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const [config, controller] = await Promise.all([configPromise, controllerPromise]);
+    if (!controller) return;
+
     const wispUrls = config.wispUrls;
 
     await connection.setTransport("/libcurl/index.mjs", [
