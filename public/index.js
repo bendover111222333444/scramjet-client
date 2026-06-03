@@ -39,7 +39,7 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const config = await configPromise;
-    const wispUrl = config.wispUrl;
+    const wispUrls = config.wispUrls;
 
     try {
         await registerSW();
@@ -51,9 +51,9 @@ form.addEventListener("submit", async (event) => {
 
     await navigator.serviceWorker.ready;
 
-    await connection.setTransport("/libcurl/index.mjs", [
-        { wisp: wispUrl },
-    ]);
+	await connection.setTransport("/libcurl/index.mjs", [
+		{ wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
+	]);
 
     const url = search(address.value, searchEngine.value);
     const frame = scramjet.createFrame();
