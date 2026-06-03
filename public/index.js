@@ -38,14 +38,6 @@ form.addEventListener("submit", async (event) => {
     const config = await configPromise;
     const wispUrls = config.wispUrls;
 
-    try {
-        await registerSW();
-    } catch (err) {
-        error.textContent = "Failed to register service worker.";
-        errorCode.textContent = err.toString();
-        throw err;
-    }
-
     await navigator.serviceWorker.ready;
 
     await connection.setTransport("/libcurl/index.mjs", [
