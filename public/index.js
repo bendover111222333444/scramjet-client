@@ -48,6 +48,7 @@ form.addEventListener("submit", async (event) => {
 
     const url = search(address.value, searchEngine.value);
     const frame = controller.createFrame();
+    frame.element.id = "sj-frame";
     document.body.appendChild(frame.element);
     frame.go(url);
 });

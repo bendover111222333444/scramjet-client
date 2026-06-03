@@ -57,7 +57,7 @@ fastify.get("/controller.sw.js", (request, reply) => {
 });
 
 fastify.get("/scram", (request, reply) => {
-    reply.redirect("/scram/");
+    reply.redirect("/scram/scramjet.js");
 });
 
 fastify.get("/scramjet/*", (request, reply) => {
