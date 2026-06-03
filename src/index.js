@@ -23,11 +23,13 @@ const fastify = Fastify({
             .on("request", (req, res) => {
                 res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
                 res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+                if (req.url.startsWith("/controller/")) {
+                    res.setHeader("Service-Worker-Allowed", "/");
+                }
                 handler(req, res);
             });
     },
 });
-
 fastify.register(fastifyStatic, {
     root: publicPath,
     decorateReply: true,
