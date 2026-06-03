@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { fileURLToPath } from "url";
 import { hostname } from "node:os";
+import { createRequire } from "node:module";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 
@@ -8,9 +9,10 @@ import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
-const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
+const require = createRequire(import.meta.url);
+const controllerPath = require.resolve("@mercuryworkshop/scramjet-controller").replace("/dist/controller-external.mjs", "/dist");
 
-// Wisp Configuration: Refer to the documentation at https://www.npmjs.com/package/@mercuryworkshop/wisp-js
+const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
 const fastify = Fastify({
     serverFactory: (handler) => {
@@ -24,61 +26,55 @@ const fastify = Fastify({
 });
 
 fastify.register(fastifyStatic, {
-	root: publicPath,
-	decorateReply: true,
+    root: publicPath,
+    decorateReply: true,
 });
 
 fastify.register(fastifyStatic, {
-	root: scramjetPath,
-	prefix: "/scram/",
-	decorateReply: false,
+    root: scramjetPath,
+    prefix: "/scram/",
+    decorateReply: false,
 });
 
 fastify.register(fastifyStatic, {
-	root: libcurlPath,
-	prefix: "/libcurl/",
-	decorateReply: false,
+    root: controllerPath,
+    prefix: "/controller/",
+    decorateReply: false,
 });
 
 fastify.register(fastifyStatic, {
-	root: baremuxPath,
-	prefix: "/baremux/",
-	decorateReply: false,
+    root: libcurlPath,
+    prefix: "/libcurl/",
+    decorateReply: false,
+});
+
+fastify.register(fastifyStatic, {
+    root: baremuxPath,
+    prefix: "/baremux/",
+    decorateReply: false,
 });
 
 fastify.setNotFoundHandler((res, reply) => {
-	return reply.code(404).type("text/html").sendFile("404.html");
+    return reply.code(404).type("text/html").sendFile("404.html");
 });
 
 fastify.server.on("listening", () => {
-	const address = fastify.server.address();
-
-	// by default we are listening on 0.0.0.0 (every interface)
-	// we just need to list a few
-	console.log("Listening on:");
-	console.log(`\thttp://localhost:${address.port}`);
-	console.log(`\thttp://${hostname()}:${address.port}`);
-	console.log(
-		`\thttp://${
-			address.family === "IPv6" ? `[${address.address}]` : address.address
-		}:${address.port}`
-	);
+    const address = fastify.server.address();
+    console.log("Listening on:");
+    console.log(`\thttp://localhost:${address.port}`);
+    console.log(`\thttp://${hostname()}:${address.port}`);
 });
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 function shutdown() {
-	console.log("SIGTERM signal received: closing HTTP server");
-	fastify.close();
-	process.exit(0);
+    console.log("SIGTERM signal received: closing HTTP server");
+    fastify.close();
+    process.exit(0);
 }
 
 let port = parseInt(process.env.PORT || "");
-
 if (isNaN(port)) port = 8080;
 
-fastify.listen({
-	port: port,
-	host: "0.0.0.0",
-});
+fastify.listen({ port, host: "0.0.0.0" });
