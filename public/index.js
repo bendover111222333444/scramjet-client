@@ -49,14 +49,13 @@ form.addEventListener("submit", async (event) => {
 		throw err;
 	}
 
+	await connection.setTransport("/libcurl/index.mjs", [
+		{ wisp: wispUrl },
+	]);
 	const url = search(address.value, searchEngine.value);
-	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
-		await connection.setTransport("/libcurl/index.mjs", [
-			{ wisp: wispUrl },
-		]);
-	}
 	const frame = scramjet.createFrame();
 	frame.frame.id = "sj-frame";
 	document.body.appendChild(frame.frame);
 	frame.go(url);
+	
 });
