@@ -36,25 +36,28 @@ const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 form.addEventListener("submit", async (event) => {
-	event.preventDefault();
+    event.preventDefault();
 
-	const config = await configPromise;
+    const config = await configPromise;
     const wispUrl = config.wispUrl;
-	try {
-		await registerSW();
-	} catch (err) {
-		error.textContent = "Failed to register service worker.";
-		errorCode.textContent = err.toString();
-		throw err;
-	}
 
-	await connection.setTransport("/libcurl/index.mjs", [
-		{ wisp: wispUrl },
-	]);
-	const url = search(address.value, searchEngine.value);
-	const frame = scramjet.createFrame();
-	frame.frame.id = "sj-frame";
-	document.body.appendChild(frame.frame);
-	frame.go(url);
-	
+    try {
+        await registerSW();
+    } catch (err) {
+        error.textContent = "Failed to register service worker.";
+        errorCode.textContent = err.toString();
+        throw err;
+    }
+
+    await navigator.serviceWorker.ready;
+
+    await connection.setTransport("/libcurl/index.mjs", [
+        { wisp: wispUrl },
+    ]);
+
+    const url = search(address.value, searchEngine.value);
+    const frame = scramjet.createFrame();
+    frame.frame.id = "sj-frame";
+    document.body.appendChild(frame.frame);
+    frame.go(url);
 });
