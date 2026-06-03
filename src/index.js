@@ -56,6 +56,10 @@ fastify.get("/controller.sw.js", (request, reply) => {
     reply.sendFile("controller.sw.js", controllerPath);
 });
 
+fastify.get("/scram", (request, reply) => {
+    reply.redirect("/scram/");
+});
+
 fastify.get("/scramjet/*", (request, reply) => {
     reply.code(200).type("text/html").send(`<!DOCTYPE html><html><head><meta charset="utf-8"><script>
         navigator.serviceWorker.ready.then(() => location.reload());
