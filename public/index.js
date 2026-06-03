@@ -33,7 +33,15 @@ const scramjet = new ScramjetController({
 scramjet.init();
 
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-const config = await fetch("/wispServer.json").then(r => r.json());
+
+let config
+
+(async () => {
+
+	config = await fetch("/wispServer.json").then(r => r.json());
+
+})();
+
 let wispUrl = config.wispUrl
 
 form.addEventListener("submit", async (event) => {
