@@ -61,6 +61,13 @@ fastify.setNotFoundHandler((res, reply) => {
     return reply.code(404).type("text/html").sendFile("404.html");
 });
 
+fastify.addHook("onSend", (request, reply, payload, done) => {
+    if (request.url.startsWith("/controller/")) {
+        reply.header("Service-Worker-Allowed", "/");
+    }
+    done(null, payload);
+});
+
 fastify.server.on("listening", () => {
     const address = fastify.server.address();
     console.log("Listening on:");
