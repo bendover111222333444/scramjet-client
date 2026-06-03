@@ -6,6 +6,9 @@ const searchEngine = document.getElementById("sj-search-engine");
 const error = document.getElementById("sj-error");
 const errorCode = document.getElementById("sj-error-code");
 
+let transport;
+let wispIndex = 0;
+
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
@@ -19,10 +22,12 @@ const controllerPromise = (async () => {
 
     const config = await configPromise;
     const wispUrls = config.wispUrls;
-    const wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
+
+    let wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
 
     const { default: LibcurlClient } = await import("/libcurl/index.mjs");
-    const transport = new LibcurlClient({ wisp });
+
+    transport = new LibcurlClient({ wisp });
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
@@ -35,6 +40,20 @@ const controllerPromise = (async () => {
             virtualWasmPath: "/scram/scramjet.wasm",
         },
     });
+
+    controller.onError = async (err) => {
+    if (
+        String(err).includes("error code 35") ||
+        String(err).includes("error code 7")
+    ) {
+        wispIndex++;
+        wisp = wispUrls[wispIndex % wispUrls.length];
+
+        transport = new LibcurlClient({ wisp });
+
+        controller.transport = transport;
+    }
+    };
 
     await controller.wait();
     return controller;
