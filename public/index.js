@@ -9,15 +9,13 @@ const errorCode = document.getElementById("sj-error-code");
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
-let controller;
-
-(async () => {
+const controllerPromise = (async () => {
     await navigator.serviceWorker.register("/controller/controller.sw.js", {
         scope: "/",
     });
     await navigator.serviceWorker.ready;
 
-    controller = new $scramjetController.Controller({
+    const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
         transport: connection,
         config: {
@@ -30,15 +28,14 @@ let controller;
     });
 
     await controller.wait();
+    return controller;
 })();
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const config = await configPromise;
+    const [config, controller] = await Promise.all([configPromise, controllerPromise]);
     const wispUrls = config.wispUrls;
-
-    await navigator.serviceWorker.ready;
 
     await connection.setTransport("/libcurl/index.mjs", [
         { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
