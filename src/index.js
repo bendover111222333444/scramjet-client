@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const controllerPath = dirname(require.resolve("@mercuryworkshop/scramjet-controller/package.json")) + "/dist";
+const controllerPath = fileURLToPath(new URL("../node_modules/@mercuryworkshop/scramjet-controller/dist", import.meta.url));
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
