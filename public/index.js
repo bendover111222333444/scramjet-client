@@ -6,14 +6,7 @@ const searchEngine = document.getElementById("sj-search-engine");
 const error = document.getElementById("sj-error");
 const errorCode = document.getElementById("sj-error-code");
 
-let transport;
-let controller;
-let wispIndex = 0;
-let wispUrls;
-
 const configPromise = fetch("/wispServer.json").then(r => r.json());
-
-let resetController;
 
 const controllerPromise = (async () => {
     await navigator.serviceWorker.register("/sw.js", { scope: "/" });
@@ -25,15 +18,13 @@ const controllerPromise = (async () => {
     }
 
     const config = await configPromise;
-    wispUrls = config.wispUrls;
-
-    let wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
+    const wispUrls = config.wispUrls;
+    const wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
 
     const { default: LibcurlClient } = await import("/libcurl/index.mjs");
+    const transport = new LibcurlClient({ wisp });
 
-    transport = new LibcurlClient({ wisp });
-
-    controller = new $scramjetController.Controller({
+    const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
         transport,
         config: {
@@ -45,19 +36,6 @@ const controllerPromise = (async () => {
         },
     });
 
-    resetController = async () => {
-        wispIndex++;
-        let wisp = wispUrls[wispIndex % wispUrls.length];
-
-        transport = new LibcurlClient({ wisp });
-
-        controller = new $scramjetController.Controller({
-            serviceworker: (await navigator.serviceWorker.ready).active,
-            transport,
-            config: controller.config
-        });
-    };
-
     await controller.wait();
     return controller;
 })();
@@ -65,24 +43,12 @@ const controllerPromise = (async () => {
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    await configPromise;
-    const ctrl = await controllerPromise;
-    if (!ctrl) return;
+    const [config, controller] = await Promise.all([configPromise, controllerPromise]);
+    if (!controller) return;
 
-    try {
-        const url = search(address.value, searchEngine.value);
-
-        const frame = controller.createFrame();
-        frame.element.id = "sj-frame";
-        document.body.appendChild(frame.element);
-
-        frame.go(url);
-    } catch (err) {
-        if (
-            String(err).includes("error code 35") ||
-            String(err).includes("error code 7")
-        ) {
-            await resetController();
-        }
-    }
+    const url = search(address.value, searchEngine.value);
+    const frame = controller.createFrame();
+    frame.element.id = "sj-frame";
+    document.body.appendChild(frame.element);
+    frame.go(url);
 });
