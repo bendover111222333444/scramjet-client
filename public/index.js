@@ -6,7 +6,8 @@ const searchEngine = document.getElementById("sj-search-engine");
 const error = document.getElementById("sj-error");
 const errorCode = document.getElementById("sj-error-code");
 
-const connection = new BareMux.BareClient();
+const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+const bareClient = new BareMux.BareClient();
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
@@ -20,7 +21,7 @@ const controllerPromise = (async () => {
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
-        transport: connection,
+        transport: bareClient,
         config: {
             prefix: "/scramjet/",
             scramjetPath: "/scram/",
@@ -42,7 +43,7 @@ form.addEventListener("submit", async (event) => {
 
     const wispUrls = config.wispUrls;
 
-    BareMux.SetTransport("/libcurl/index.mjs", [
+    await connection.setTransport("/libcurl/index.mjs", [
         { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
     ]);
 
