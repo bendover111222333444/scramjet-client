@@ -21,7 +21,7 @@ const controllerPromise = (async () => {
     const wispUrls = config.wispUrls;
     const wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
 
-    const { LibcurlClient } = await import("/libcurl/index.mjs");
+    const { default: LibcurlClient } = await import("/libcurl/index.mjs");
     const transport = new LibcurlClient({ wisp });
 
     const controller = new $scramjetController.Controller({
