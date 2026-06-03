@@ -39,7 +39,7 @@ form.addEventListener("submit", async (event) => {
 	event.preventDefault();
 
 	const config = await configPromise;
-    const wispUrl = config.wispUrl;
+    const wispUrl = "wss://wisp.mercuryworkshop.workers.dev/wisp/"
 
 	try {
 		await registerSW();
