@@ -6,8 +6,6 @@ const searchEngine = document.getElementById("sj-search-engine");
 const error = document.getElementById("sj-error");
 const errorCode = document.getElementById("sj-error-code");
 
-const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-const bareClient = new BareMux.BareClient();
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
@@ -19,9 +17,16 @@ const controllerPromise = (async () => {
         return null;
     }
 
+    const config = await configPromise;
+    const wispUrls = config.wispUrls;
+    const wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
+
+    const { LibcurlClient } = await import("/libcurl/index.mjs");
+    const transport = new LibcurlClient({ wisp });
+
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
-        transport: bareClient,
+        transport,
         config: {
             prefix: "/scramjet/",
             scramjetPath: "/scram/",
@@ -40,12 +45,6 @@ form.addEventListener("submit", async (event) => {
 
     const [config, controller] = await Promise.all([configPromise, controllerPromise]);
     if (!controller) return;
-
-    const wispUrls = config.wispUrls;
-
-    await connection.setTransport("/libcurl/index.mjs", [
-        { wisp: wispUrls[Math.floor(Math.random() * wispUrls.length)] },
-    ]);
 
     const url = search(address.value, searchEngine.value);
     const frame = controller.createFrame();
