@@ -1,6 +1,6 @@
 {
     
-    "wispServers": [
+    "wispUrls": [
 
         "wss://scramjet-server-wisp.sigmasigmaonthewallwhoisthe2.workers.dev/wisp/",
         "wss://scramjet-server-wisp-1.sigmasigmaonthewallwhoisthe2.workers.dev/wisp/",
