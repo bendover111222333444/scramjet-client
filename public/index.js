@@ -10,7 +10,7 @@ const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
-    await navigator.serviceWorker.register("/controller/controller.sw.js", { scope: "/" });
+    await navigator.serviceWorker.register("/controller.sw.js", { scope: "/" });
 
     if (!navigator.serviceWorker.controller) {
         await new Promise(resolve => {

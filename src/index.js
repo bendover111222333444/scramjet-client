@@ -61,7 +61,7 @@ fastify.setNotFoundHandler((res, reply) => {
     return reply.code(404).type("text/html").sendFile("404.html");
 });
 
-fastify.get("/sw.js", (request, reply) => {
+fastify.get("/controller.sw.js", (request, reply) => {
     reply.sendFile("controller.sw.js", controllerPath);
 });
 
