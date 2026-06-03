@@ -10,7 +10,13 @@ const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
-    await navigator.serviceWorker.register("/controller.sw.js", { scope: "/" });
+    
+    const reg = await navigator.serviceWorker.register("/controller.sw.js", { scope: "/" });
+    if (reg.active && !navigator.serviceWorker.controller) {
+        await reg.active.postMessage({ type: "claim" });
+        await new Promise(r => navigator.serviceWorker.addEventListener("controllerchange", r, { once: true }));
+    }
+
     await navigator.serviceWorker.ready;
 
     if (!navigator.serviceWorker.controller) {
