@@ -56,7 +56,7 @@ fastify.get("/controller.sw.js", (request, reply) => {
     reply.sendFile("controller.sw.js", controllerPath);
 });
 
-fastify.get("/scram", (request, reply) => {
+fastify.get("/scram/", (request, reply) => {
     reply.redirect("/scram/scramjet.js");
 });
 
