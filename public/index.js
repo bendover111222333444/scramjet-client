@@ -11,16 +11,13 @@ const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 const controllerPromise = (async () => {
     await navigator.serviceWorker.register("/controller.sw.js", { scope: "/" });
+    await navigator.serviceWorker.ready;
 
     if (!navigator.serviceWorker.controller) {
-        await new Promise(resolve => {
-            navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
-        });
+        // SW activated but not controlling — reload so it takes control
         location.reload();
-        return;
+        return null;
     }
-
-    await navigator.serviceWorker.ready;
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
