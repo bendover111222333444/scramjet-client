@@ -23,13 +23,11 @@ const fastify = Fastify({
             .on("request", (req, res) => {
                 res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
                 res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-                if (req.url.startsWith("/controller/")) {
-                    res.setHeader("Service-Worker-Allowed", "/");
-                }
                 handler(req, res);
             });
     },
 });
+
 fastify.register(fastifyStatic, {
     root: publicPath,
     decorateReply: true,
@@ -63,11 +61,8 @@ fastify.setNotFoundHandler((res, reply) => {
     return reply.code(404).type("text/html").sendFile("404.html");
 });
 
-fastify.addHook("onSend", (request, reply, payload, done) => {
-    if (request.url.startsWith("/controller/")) {
-        reply.header("Service-Worker-Allowed", "/");
-    }
-    done(null, payload);
+fastify.get("/sw.js", (request, reply) => {
+    reply.sendFile("controller.sw.js", controllerPath);
 });
 
 fastify.server.on("listening", () => {
