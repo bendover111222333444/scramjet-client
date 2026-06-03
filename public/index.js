@@ -34,15 +34,15 @@ scramjet.init();
 
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 
-let config
+let config;
+let wispUrl;
 
 (async () => {
 
 	config = await fetch("/wispServer.json").then(r => r.json());
+	wispUrl = config.wispUrl
 
 })();
-
-let wispUrl = config.wispUrl
 
 form.addEventListener("submit", async (event) => {
 	event.preventDefault();
