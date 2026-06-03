@@ -33,19 +33,13 @@ const scramjet = new ScramjetController({
 scramjet.init();
 
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-
-let config;
-let wispUrl;
-
-(async () => {
-
-	config = await fetch("/wispServer.json").then(r => r.json());
-	wispUrl = config.wispUrl
-
-})();
+const configPromise = fetch("/wispServer.json").then(r => r.json());
 
 form.addEventListener("submit", async (event) => {
 	event.preventDefault();
+
+	const config = await configPromise;
+    const wispUrl = config.wispUrl;
 
 	try {
 		await registerSW();
@@ -58,7 +52,7 @@ form.addEventListener("submit", async (event) => {
 	const url = search(address.value, searchEngine.value);
 	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
 		await connection.setTransport("/libcurl/index.mjs", [
-			{ websocket: wispUrl },
+			{ wisp: wispUrl },
 		]);
 	}
 	const frame = scramjet.createFrame();
