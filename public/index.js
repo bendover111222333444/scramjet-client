@@ -7,9 +7,13 @@ const error = document.getElementById("sj-error");
 const errorCode = document.getElementById("sj-error-code");
 
 let transport;
+let controller;
 let wispIndex = 0;
+let wispUrls;
 
 const configPromise = fetch("/wispServer.json").then(r => r.json());
+
+let resetController;
 
 const controllerPromise = (async () => {
     await navigator.serviceWorker.register("/sw.js", { scope: "/" });
@@ -21,7 +25,7 @@ const controllerPromise = (async () => {
     }
 
     const config = await configPromise;
-    const wispUrls = config.wispUrls;
+    wispUrls = config.wispUrls;
 
     let wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
 
@@ -29,7 +33,7 @@ const controllerPromise = (async () => {
 
     transport = new LibcurlClient({ wisp });
 
-    const controller = new $scramjetController.Controller({
+    controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
         transport,
         config: {
@@ -41,18 +45,17 @@ const controllerPromise = (async () => {
         },
     });
 
-    controller.onError = async (err) => {
-    if (
-        String(err).includes("error code 35") ||
-        String(err).includes("error code 7")
-    ) {
+    resetController = async () => {
         wispIndex++;
-        wisp = wispUrls[wispIndex % wispUrls.length];
+        let wisp = wispUrls[wispIndex % wispUrls.length];
 
         transport = new LibcurlClient({ wisp });
 
-        controller.transport = transport;
-    }
+        controller = new $scramjetController.Controller({
+            serviceworker: (await navigator.serviceWorker.ready).active,
+            transport,
+            config: controller.config
+        });
     };
 
     await controller.wait();
@@ -62,12 +65,24 @@ const controllerPromise = (async () => {
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const [config, controller] = await Promise.all([configPromise, controllerPromise]);
-    if (!controller) return;
+    await configPromise;
+    const ctrl = await controllerPromise;
+    if (!ctrl) return;
 
-    const url = search(address.value, searchEngine.value);
-    const frame = controller.createFrame();
-    frame.element.id = "sj-frame";
-    document.body.appendChild(frame.element);
-    frame.go(url);
+    try {
+        const url = search(address.value, searchEngine.value);
+
+        const frame = controller.createFrame();
+        frame.element.id = "sj-frame";
+        document.body.appendChild(frame.element);
+
+        frame.go(url);
+    } catch (err) {
+        if (
+            String(err).includes("error code 35") ||
+            String(err).includes("error code 7")
+        ) {
+            await resetController();
+        }
+    }
 });
