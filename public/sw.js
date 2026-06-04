@@ -1,18 +1,5 @@
 importScripts("/controller.sw.js");
 
-const TELEMETRY_PATHS = [
-    "/api/stats/qoe",
-    "/api/stats/watchtime",
-    "/api/stats/playback",
-    "/api/stats/ads",
-    "/api/timedtext",
-    "/viewthroughconversion",
-    "/ptracking",
-    "/pagead/",
-    "/log_event",
-    "/generate_204",
-];
-
 const YOUTUBE_HOSTS = ["youtube.com", "ytimg.com", "ggpht.com", "googleusercontent.com"];
 const VIDEO_CDN_HOSTS = ["googlevideo.com"];
 
@@ -35,20 +22,6 @@ self.addEventListener("message", async e => {
     }
 });
 
-function isTelemetry(outerUrl) {
-    try {
-        const parts = outerUrl.pathname.split('/');
-        // strip everything after the scramjet prefix (3 parts)
-        const proxiedEncoded = parts.slice(3).join('/');
-        // remove any trailing ?$mode etc added by scramjet
-        const cleaned = proxiedEncoded.split('?')[0];
-        const proxied = decodeURIComponent(cleaned);
-        const innerUrl = new URL(proxied);
-        return TELEMETRY_PATHS.some(p => innerUrl.pathname.includes(p));
-    } catch(e) {
-        return false;
-    }
-}
 function rewriteRequest(request, url) {
     const headers = new Headers(request.headers);
     headers.set("Origin", "https://www.youtube.com");
@@ -75,13 +48,14 @@ function rewriteRequest(request, url) {
 addEventListener("fetch", e => {
     if (!$scramjetController.shouldRoute(e)) return;
 
+    // Block fire-and-forget telemetry requests immediately
+    if (e.request.keepalive) {
+        e.respondWith(new Response(null, { status: 204 }));
+        return;
+    }
+
     try {
         const url = new URL(e.request.url);
-
-        if (isTelemetry(url)) {
-            e.respondWith(new Response(null, { status: 204 }));
-            return;
-        }
 
         const needsRewrite = VIDEO_CDN_HOSTS.some(h => url.hostname.includes(h)) ||
                              YOUTUBE_HOSTS.some(h => url.hostname.includes(h));
