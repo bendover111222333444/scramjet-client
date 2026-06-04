@@ -22,6 +22,21 @@ self.addEventListener("message", async e => {
     }
 });
 
+function isTelemetry(request) {
+    if (request.keepalive) return true;
+    try {
+        const parts = new URL(request.url).pathname.split('/');
+        const inner = new URL(decodeURIComponent(parts.slice(3).join('/').split('?')[0]));
+        return inner.pathname.startsWith('/api/stats') ||
+               inner.pathname.startsWith('/api/timedtext') ||
+               inner.pathname.startsWith('/ptracking') ||
+               inner.pathname.startsWith('/pagead') ||
+               inner.pathname.includes('/generate_204') ||
+               inner.pathname.includes('/log_event') ||
+               inner.pathname.includes('viewthroughconversion');
+    } catch(e) { return false; }
+}
+
 function rewriteRequest(request, url) {
     const headers = new Headers(request.headers);
     headers.set("Origin", "https://www.youtube.com");
@@ -48,8 +63,7 @@ function rewriteRequest(request, url) {
 addEventListener("fetch", e => {
     if (!$scramjetController.shouldRoute(e)) return;
 
-    // Block fire-and-forget telemetry requests immediately
-    if (e.request.keepalive) {
+    if (isTelemetry(e.request)) {
         e.respondWith(new Response(null, { status: 204 }));
         return;
     }
