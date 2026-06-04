@@ -1,34 +1,36 @@
 importScripts("/controller.sw.js");
 
-// Diagnostic snapshot - call this from DevTools console:
-// navigator.serviceWorker.controller.postMessage({ type: 'debug' })
-self.addEventListener("message", e => {
-    if (e.data?.type === "debug") {
-        e.source.postMessage({
-            type: "debug-response",
-            inFlight: inFlightRequests.size,
-            requests: [...inFlightRequests.entries()].map(([id, r]) => ({
-                id,
-                url: r.url,
-                age: Date.now() - r.startTime,
-            }))
-        });
-    }
-});
+const TELEMETRY_PATHS = [
+    "/api/stats/qoe",
+    "/api/stats/watchtime", 
+    "/api/stats/playback",
+    "/api/stats/ads",
+    "/api/timedtext",
+    "/ptracking",
+    "/pagead/",
+    "/log_event",
+    "/generate_204",
+];
 
-const inFlightRequests = new Map();
-let reqId = 0;
+function isTelemetry(url) {
+    return TELEMETRY_PATHS.some(p => url.pathname.includes(p)) ||
+           url.searchParams.get("alt") === "json" && url.pathname.includes("log_event");
+}
 
 addEventListener("fetch", e => {
     if (!$scramjetController.shouldRoute(e)) return;
 
-    const id = reqId++;
-    const url = e.request.url;
-    inFlightRequests.set(id, { url, startTime: Date.now() });
+    try {
+        const url = new URL(e.request.url);
 
-    e.respondWith(
-        $scramjetController.route(e).finally(() => {
-            inFlightRequests.delete(id);
-        })
-    );
+        if (isTelemetry(url)) {
+            // Kill telemetry immediately - don't let it reach scramjet
+            e.respondWith(new Response(null, { status: 204 }));
+            return;
+        }
+    } catch (err) {
+        console.error("[sw] telemetry check failed:", err);
+    }
+
+    e.respondWith($scramjetController.route(e));
 });
