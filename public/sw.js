@@ -38,14 +38,17 @@ self.addEventListener("message", async e => {
 function isTelemetry(outerUrl) {
     try {
         const parts = outerUrl.pathname.split('/');
-        const proxied = decodeURIComponent(parts.slice(3).join('/'));
+        // strip everything after the scramjet prefix (3 parts)
+        const proxiedEncoded = parts.slice(3).join('/');
+        // remove any trailing ?$mode etc added by scramjet
+        const cleaned = proxiedEncoded.split('?')[0];
+        const proxied = decodeURIComponent(cleaned);
         const innerUrl = new URL(proxied);
         return TELEMETRY_PATHS.some(p => innerUrl.pathname.includes(p));
     } catch(e) {
         return false;
     }
 }
-
 function rewriteRequest(request, url) {
     const headers = new Headers(request.headers);
     headers.set("Origin", "https://www.youtube.com");
