@@ -3,28 +3,33 @@ importScripts("/controller.sw.js");
 addEventListener("fetch", e => {
     if (!$scramjetController.shouldRoute(e)) return;
 
-    let request = e.request;
-
     try {
         const url = new URL(e.request.url);
         if (url.hostname.includes("googlevideo.com")) {
             url.searchParams.set("c", "MWEB");
             url.searchParams.delete("sabr");
             url.searchParams.delete("rqh");
-            request = new Request(url.toString(), {
+
+            const rewritten = new Request(url.toString(), {
                 method: e.request.method,
                 headers: e.request.headers,
-                body: e.request.method !== "GET" && e.request.method !== "HEAD"
-                    ? e.request.body
-                    : undefined,
-                mode: e.request.mode,
+                // only pass body for methods that support it
+                ...(e.request.method !== "GET" && e.request.method !== "HEAD"
+                    ? { body: e.request.body, duplex: "half" }
+                    : {}),
+                mode: "cors",
                 credentials: e.request.credentials,
                 redirect: e.request.redirect,
             });
+
+            e.respondWith($scramjetController.route(
+                Object.defineProperty(e, "request", { value: rewritten })
+            ));
+            return;
         }
     } catch (err) {
         console.error("[sw] Failed to rewrite googlevideo request:", err);
     }
 
-    e.respondWith($scramjetController.route({ ...e, request }));
+    e.respondWith($scramjetController.route(e));
 });
