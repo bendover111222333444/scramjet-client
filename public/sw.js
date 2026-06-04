@@ -6,6 +6,7 @@ const TELEMETRY_PATHS = [
     "/api/stats/playback",
     "/api/stats/ads",
     "/api/timedtext",
+    "/viewthroughconversion",
     "/ptracking",
     "/pagead/",
     "/log_event",
