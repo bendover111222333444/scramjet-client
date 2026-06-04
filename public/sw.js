@@ -35,9 +35,15 @@ self.addEventListener("message", async e => {
     }
 });
 
-function isTelemetry(url) {
-    return TELEMETRY_PATHS.some(p => url.pathname.includes(p)) ||
-           (url.searchParams.get("alt") === "json" && url.pathname.includes("log_event"));
+function isTelemetry(outerUrl) {
+    try {
+        const parts = outerUrl.pathname.split('/');
+        const proxied = decodeURIComponent(parts.slice(3).join('/'));
+        const innerUrl = new URL(proxied);
+        return TELEMETRY_PATHS.some(p => innerUrl.pathname.includes(p));
+    } catch(e) {
+        return false;
+    }
 }
 
 function rewriteRequest(request, url) {
