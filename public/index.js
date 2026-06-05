@@ -21,7 +21,7 @@ const controllerPromise = (async () => {
     const wispUrls = config.wispUrls;
     const wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
 
-    const { EpoxyClient } = await import("/epoxy/index.js");
+    const { EpoxyClient } = await import("/epoxy/index.mjs");
     const transport = new EpoxyClient({ wisp });
 
     const controller = new $scramjetController.Controller({
