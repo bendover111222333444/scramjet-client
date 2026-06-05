@@ -48,33 +48,26 @@ const controllerPromise = (async () => {
     window._wispUrls = wispUrls;
     window._createTransport = createTransport;
 
-    // Auto-reconnect when epoxy dies
-    navigator.serviceWorker.addEventListener("message", async e => {
-        if (e.data?.type === "epoxy-dead") {
-            console.log("[epoxy] transport died, reconnecting...");
-            try {
-                transport = await createTransport(wispUrls);
-                await controller.setTransport(transport);
-                console.log("[epoxy] transport replaced");
-            } catch (err) {
-                console.error("[epoxy] reconnect failed:", err);
-            }
+    // Detect epoxy crash via console.error interception
+    const origError = console.error;
+    console.error = function(...args) {
+        const msg = args.join(' ');
+        if (msg.includes('MuxTaskEnded') || msg.includes('tls handshake eof')) {
+            window.dispatchEvent(new CustomEvent('epoxy-dead'));
+        }
+        origError.apply(console, args);
+    };
+
+    window.addEventListener('epoxy-dead', async () => {
+        console.log('[epoxy] crash detected, reconnecting...');
+        try {
+            transport = await createTransport(wispUrls);
+            await controller.setTransport(transport);
+            console.log('[epoxy] transport replaced');
+        } catch(err) {
+            origError('[epoxy] reconnect failed:', err);
         }
     });
-
-    // Poll transport health every 2 seconds
-    setInterval(async () => {
-        if (!transport?.ready) {
-            console.log("[epoxy] transport not ready, reconnecting...");
-            try {
-                transport = await createTransport(wispUrls);
-                await controller.setTransport(transport);
-                console.log("[epoxy] transport replaced");
-            } catch(err) {
-                console.error("[epoxy] reconnect failed:", err);
-            }
-        }
-    }, 2000);
 
     return controller;
 })();
