@@ -1,5 +1,4 @@
 {
-    "installCommand": "pnpm install",
     "routes": [
         { "src": "/(.*)", "dest": "/src/index.js" }
     ]
