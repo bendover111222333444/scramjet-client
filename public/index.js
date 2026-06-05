@@ -30,7 +30,9 @@ const controllerPromise = (async () => {
 
     let transport = await createTransport(wispUrls);
 
-    window._transport = transport;
+    window._controller = controller;
+    window._wispUrls = wispUrls;
+    window._createTransport = createTransport;
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
