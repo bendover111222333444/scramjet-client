@@ -60,6 +60,11 @@ function rewriteRequest(request, url) {
     });
 }
 
+async function notifyEpoxyDead() {
+    const clients = await self.clients.matchAll();
+    clients.forEach(c => c.postMessage({ type: "epoxy-dead" }));
+}
+
 addEventListener("fetch", e => {
     if (!$scramjetController.shouldRoute(e)) return;
 
@@ -83,9 +88,16 @@ addEventListener("fetch", e => {
         inFlightRequests.set(id, { url: e.request.url, startTime: Date.now() });
 
         e.respondWith(
-            $scramjetController.route(routeTarget).finally(() => {
-                inFlightRequests.delete(id);
-            })
+            $scramjetController.route(routeTarget)
+                .catch(async err => {
+                    if (err?.message?.includes("MuxTaskEnded") || err?.message?.includes("tls handshake eof")) {
+                        await notifyEpoxyDead();
+                    }
+                    throw err;
+                })
+                .finally(() => {
+                    inFlightRequests.delete(id);
+                })
         );
         return;
 
