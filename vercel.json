@@ -1,5 +1,11 @@
 {
     "installCommand": "pnpm install",
+    "functions": {
+        "src/index.js": {
+            "memory": 1024,
+            "maxDuration": 30
+        }
+    },
     "routes": [
         { "src": "/(.*)", "dest": "/src/index.js" }
     ]
