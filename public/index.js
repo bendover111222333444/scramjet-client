@@ -30,10 +30,6 @@ const controllerPromise = (async () => {
 
     let transport = await createTransport(wispUrls);
 
-    window._controller = controller;
-    window._wispUrls = wispUrls;
-    window._createTransport = createTransport;
-
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
         transport,
@@ -47,6 +43,10 @@ const controllerPromise = (async () => {
     });
 
     await controller.wait();
+
+    window._controller = controller;
+    window._wispUrls = wispUrls;
+    window._createTransport = createTransport;
 
     // Auto-reconnect when epoxy dies
     navigator.serviceWorker.addEventListener("message", async e => {
