@@ -48,11 +48,13 @@ const controllerPromise = (async () => {
     window._wispUrls = wispUrls;
     window._createTransport = createTransport;
 
-    // Detect epoxy crash via console.error interception
+    let reconnecting = false;
+
     const origError = console.error;
     console.error = function(...args) {
         const msg = args.join(' ');
-        if (msg.includes('MuxTaskEnded') || msg.includes('tls handshake eof')) {
+        if (!reconnecting && (msg.includes('MuxTaskEnded') || msg.includes('tls handshake eof') || msg.includes('BrokenPipe') || msg.includes('broken pipe'))) {
+            reconnecting = true;
             window.dispatchEvent(new CustomEvent('epoxy-dead'));
         }
         origError.apply(console, args);
@@ -66,6 +68,8 @@ const controllerPromise = (async () => {
             console.log('[epoxy] transport replaced');
         } catch(err) {
             origError('[epoxy] reconnect failed:', err);
+        } finally {
+            reconnecting = false;
         }
     });
 
