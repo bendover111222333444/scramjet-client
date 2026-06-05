@@ -30,6 +30,8 @@ const controllerPromise = (async () => {
 
     let transport = await createTransport(wispUrls);
 
+    window._transport = transport;
+
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
         transport,
@@ -57,6 +59,20 @@ const controllerPromise = (async () => {
             }
         }
     });
+
+    // Poll transport health every 2 seconds
+    setInterval(async () => {
+        if (!transport?.ready) {
+            console.log("[epoxy] transport not ready, reconnecting...");
+            try {
+                transport = await createTransport(wispUrls);
+                await controller.setTransport(transport);
+                console.log("[epoxy] transport replaced");
+            } catch(err) {
+                console.error("[epoxy] reconnect failed:", err);
+            }
+        }
+    }, 2000);
 
     return controller;
 })();
