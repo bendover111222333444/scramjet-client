@@ -37,6 +37,7 @@ const controllerPromise = (async () => {
     });
 
     await controller.wait();
+    console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(controller)));
     return controller;
 })();
 
