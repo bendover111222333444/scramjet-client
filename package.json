@@ -1,7 +1,7 @@
 {
-    "name": "scramjet-demo",
+    "name": "unblocked-scramjet",
     "version": "2.0.0",
-    "description": "The demo application for Scramjet, a high-performance web proxy.",
+    "description": "Scramjet app improved i guess",
     "type": "module",
     "engines": {
         "npm": ">=7.0.0",
@@ -20,9 +20,9 @@
         "fastify": "^5.7.4",
         "@fastify/static": "^9.0.0",
         "@mercuryworkshop/bare-mux": "^2.1.9",
-        "@mercuryworkshop/epoxy-transport": "^3.0.0",
+        "@bendover111222333444/epoxy-transport": "3.0.2",
         "@mercuryworkshop/scramjet": "2.0.67-alpha.1",
-        "@mercuryworkshop/scramjet-controller": "0.0.13",
+        "@bendover111222333444/scramjet-controller": "0.0.16",
         "@mercuryworkshop/wisp-js": "^0.4.1",
         "ws": "^8.18.3"
     },

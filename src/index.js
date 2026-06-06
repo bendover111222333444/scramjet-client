@@ -7,8 +7,8 @@ import fastifyStatic from "@fastify/static";
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
-const epoxyPath = fileURLToPath(new URL("../node_modules/@mercuryworkshop/epoxy-transport/dist", import.meta.url));
-const controllerPath = fileURLToPath(new URL("../node_modules/@mercuryworkshop/scramjet-controller/dist", import.meta.url));
+const epoxyPath = fileURLToPath(new URL("../node_modules/@bendover111222333444/epoxy-transport/dist", import.meta.url));
+const controllerPath = fileURLToPath(new URL("../node_modules/@bendover111222333444/scramjet-controller/dist", import.meta.url));
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
 const fastify = Fastify({
