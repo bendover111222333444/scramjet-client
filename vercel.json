@@ -1,4 +1,5 @@
 {
+    "installCommand": "pnpm install --no-frozen-lockfile",
     "routes": [
         { "src": "/(.*)", "dest": "/src/index.js" }
     ]
