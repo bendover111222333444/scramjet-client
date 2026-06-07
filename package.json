@@ -22,7 +22,7 @@
         "@mercuryworkshop/bare-mux": "^2.1.9",
         "@bendover111222333444/epoxy-transport": "3.0.2",
         "@mercuryworkshop/scramjet": "2.0.67-alpha.1",
-        "@bendover111222333444/scramjet-controller": "0.0.26",
+        "@bendover111222333444/scramjet-controller": "0.0.27",
         "@mercuryworkshop/wisp-js": "^0.4.1",
         "ws": "^8.18.3"
     },
