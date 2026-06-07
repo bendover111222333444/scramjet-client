@@ -5,11 +5,36 @@ const searchEngine = document.getElementById("sj-search-engine");
 
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
-async function createTransport(wispUrls) {
-    const wisp = wispUrls[Math.floor(Math.random() * wispUrls.length)];
+async function testWisp(wisp){
+    try{
+        const { default: EpoxyClient } = await import("/epoxy/index.mjs");
+        const transport = new EpoxyClient({ wisp });
+        await transport.init();
+        return wisp;
+    }catch(err){
+        console.warn("[WISP FAILED]", wisp, err);
+        return null;
+    }
+}
+
+async function createTransport(wispUrls){
+    const results = await Promise.all(
+        wispUrls.map(wisp => testWisp(wisp))
+    );
+
+    const working = results.filter(Boolean);
+
+    if(!working.length){
+        throw new Error("No working wisp servers found");
+    }
+
+    const wisp = working[Math.floor(Math.random() * working.length)];
+
     const { default: EpoxyClient } = await import("/epoxy/index.mjs");
     const transport = new EpoxyClient({ wisp });
+
     await transport.init();
+
     return transport;
 }
 
