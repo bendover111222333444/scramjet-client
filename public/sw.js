@@ -66,6 +66,7 @@ async function notifyEpoxyDead() {
 }
 
 addEventListener("fetch", e => {
+    console.log("[sw] destination:", e.request.destination, e.request.url.substring(0, 80));
     if (!$scramjetController.shouldRoute(e)) return;
 
     if (isTelemetry(e.request)) {
