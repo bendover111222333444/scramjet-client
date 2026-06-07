@@ -34,7 +34,7 @@ fastify.register(fastifyStatic, {
 });
 
 fastify.get("/scram/scramjet.js", (request, reply) => {
-    reply.sendFile("scramjet_bundled.js", scramjetPath);
+    reply.sendFile("scramjet.js", scramjetPath);
 });
 
 fastify.register(fastifyStatic, {
