@@ -1,4 +1,6 @@
 importScripts("/controller.sw.js");
+importScripts("/scram/scramjet.js");
+importScripts("/controller/controller.sw.js");
 
 const YOUTUBE_HOSTS = ["youtube.com", "ytimg.com", "ggpht.com", "googleusercontent.com"];
 const VIDEO_CDN_HOSTS = ["googlevideo.com"];
