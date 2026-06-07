@@ -1,4 +1,3 @@
-importScripts("/controller.sw.js");
 importScripts("/scram/scramjet.js");
 importScripts("/controller/controller.sw.js");
 
