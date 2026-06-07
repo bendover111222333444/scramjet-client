@@ -12,8 +12,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2
       '@bendover111222333444/scramjet-controller':
-        specifier: 0.0.25
-        version: 0.0.25(@mercuryworkshop/scramjet@2.0.67-alpha.1)
+        specifier: 0.0.27
+        version: 0.0.27(@mercuryworkshop/scramjet@2.0.67-alpha.1)
       '@fastify/static':
         specifier: ^9.0.0
         version: 9.1.3
@@ -45,8 +45,8 @@ packages:
   '@bendover111222333444/epoxy-transport@3.0.2':
     resolution: {integrity: sha512-zOOAwgOreBBf+1l6jKjVTskRnXKfpG52KM5NnKhR0zW+IMm8/qto5LeEmr/Bc+aTNtUhoI7+w4WWlhrpPfaFyw==}
 
-  '@bendover111222333444/scramjet-controller@0.0.25':
-    resolution: {integrity: sha512-Ve1cKqpGtO60XZuxzgvCTrMWh6M6efUD4LBpRtPrPIv7VBaPg18y0/cRx7QdcZaZ1rb//PssQCInVGH1Q3gWow==}
+  '@bendover111222333444/scramjet-controller@0.0.27':
+    resolution: {integrity: sha512-NydMe43e1fadG1r8dLsK/h+ZOYSe0bGc1Lu46ucm6sKnayLpU2jBX6gDQnrBAB/YcEkVj778tCploMHfYjWcCA==}
     peerDependencies:
       '@mercuryworkshop/scramjet': '*'
 
@@ -763,7 +763,7 @@ snapshots:
     dependencies:
       '@mercuryworkshop/epoxy-tls': 2.1.19-1
 
-  '@bendover111222333444/scramjet-controller@0.0.25(@mercuryworkshop/scramjet@2.0.67-alpha.1)':
+  '@bendover111222333444/scramjet-controller@0.0.27(@mercuryworkshop/scramjet@2.0.67-alpha.1)':
     dependencies:
       '@fastify/deepmerge': 3.2.1
       '@mercuryworkshop/proxy-transports': 1.0.2
