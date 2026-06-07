@@ -33,10 +33,6 @@ fastify.register(fastifyStatic, {
     decorateReply: true,
 });
 
-fastify.get("/scram/scramjet.js", (request, reply) => {
-    reply.sendFile("scramjet.js", scramjetPath);
-});
-
 fastify.register(fastifyStatic, {
     root: scramjetPath,
     prefix: "/scram/",

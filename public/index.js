@@ -31,10 +31,10 @@ const controllerPromise = (async () => {
         transport,
         config: {
             prefix: "/scramjet/",
-            scramjetPath: location.origin + "/scram/scramjet.js",
+            scramjetPath: "/scram/",
             wasmPath: "/scram/scramjet.wasm",
             injectPath: "/controller/controller.inject.js",
-            virtualWasmPath: "scramjet.wasm.js",
+            virtualWasmPath: "/scram/scramjet.wasm",
         },
     });
 

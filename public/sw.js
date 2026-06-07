@@ -1,4 +1,4 @@
-importScripts("/controller/controller.sw.js");
+importScripts("/controller.sw.js");
 
 const YOUTUBE_HOSTS = ["youtube.com", "ytimg.com", "ggpht.com", "googleusercontent.com"];
 const VIDEO_CDN_HOSTS = ["googlevideo.com"];
@@ -66,7 +66,6 @@ async function notifyEpoxyDead() {
 }
 
 addEventListener("fetch", e => {
-    console.log("[sw] destination:", e.request.destination, new URL(e.request.url).pathname);
     if (!$scramjetController.shouldRoute(e)) return;
 
     if (isTelemetry(e.request)) {
