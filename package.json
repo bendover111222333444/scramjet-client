@@ -20,7 +20,7 @@
         "fastify": "^5.7.4",
         "@fastify/static": "^9.0.0",
         "@mercuryworkshop/bare-mux": "^2.1.9",
-        "@bendover111222333444/epoxy-transport": "3.0.2",
+        "@bendover111222333444/epoxy-transport": "3.0.3",
         "@mercuryworkshop/scramjet": "2.0.67-alpha.1",
         "@bendover111222333444/scramjet-controller": "0.0.32",
         "@mercuryworkshop/wisp-js": "^0.4.1",

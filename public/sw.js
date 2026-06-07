@@ -1,4 +1,4 @@
-importScripts("/controller.sw.js");
+importScripts("/controller/controller.sw.js");
 
 const YOUTUBE_HOSTS = ["youtube.com", "ytimg.com", "ggpht.com", "googleusercontent.com"];
 const VIDEO_CDN_HOSTS = ["googlevideo.com"];
@@ -60,11 +60,6 @@ function rewriteRequest(request, url) {
     });
 }
 
-async function notifyEpoxyDead() {
-    const clients = await self.clients.matchAll();
-    clients.forEach(c => c.postMessage({ type: "epoxy-dead" }));
-}
-
 addEventListener("fetch", e => {
     if (!$scramjetController.shouldRoute(e)) return;
 
@@ -89,12 +84,6 @@ addEventListener("fetch", e => {
 
         e.respondWith(
             $scramjetController.route(routeTarget)
-                .catch(async err => {
-                    if (err?.message?.includes("MuxTaskEnded") || err?.message?.includes("tls handshake eof")) {
-                        await notifyEpoxyDead();
-                    }
-                    throw err;
-                })
                 .finally(() => {
                     inFlightRequests.delete(id);
                 })
@@ -107,3 +96,6 @@ addEventListener("fetch", e => {
 
     e.respondWith($scramjetController.route(e));
 });
+
+addEventListener("install", () => self.skipWaiting());
+addEventListener("activate", e => e.waitUntil(clients.claim()));
