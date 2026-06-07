@@ -12,22 +12,54 @@ async function createTransport(wispUrl) {
     return transport;
 }
 
+function getCachedTransportType(hostname) {
+    try {
+        const cache = JSON.parse(localStorage.getItem('wisp-cache') || '{}');
+        return cache[hostname] || null;
+    } catch { return null; }
+}
+
+function setCachedTransportType(hostname, type) {
+    try {
+        const cache = JSON.parse(localStorage.getItem('wisp-cache') || '{}');
+        cache[hostname] = type;
+        localStorage.setItem('wisp-cache', JSON.stringify(cache));
+    } catch {}
+}
+
 async function getBestTransport(hostname, cfWispUrls, publicWispUrls) {
     const { default: EpoxyClient } = await import("/epoxy/index.mjs");
 
+    const cached = getCachedTransportType(hostname);
+
     const cfWisp = cfWispUrls[Math.floor(Math.random() * cfWispUrls.length)];
+    const pubWisp = publicWispUrls[Math.floor(Math.random() * publicWispUrls.length)];
+
+    if (cached === 'cf') {
+        const transport = new EpoxyClient({ wisp: cfWisp });
+        await transport.init();
+        return transport;
+    }
+
+    if (cached === 'public') {
+        const transport = new EpoxyClient({ wisp: pubWisp });
+        await transport.init();
+        return transport;
+    }
+
     const cfTransport = new EpoxyClient({ wisp: cfWisp });
     await cfTransport.init();
     try {
         await cfTransport.request(new URL(`https://${hostname}/`), "HEAD", null, [], undefined);
+        setCachedTransportType(hostname, 'cf');
         return cfTransport;
     } catch {}
 
-    const pubWisp = publicWispUrls[Math.floor(Math.random() * publicWispUrls.length)];
     const pubTransport = new EpoxyClient({ wisp: pubWisp });
     await pubTransport.init();
     try {
         await pubTransport.request(new URL(`https://${hostname}/`), "HEAD", null, [], undefined);
+        setCachedTransportType(hostname, 'public');
         return pubTransport;
     } catch {}
 
