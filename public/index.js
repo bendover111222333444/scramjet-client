@@ -5,37 +5,33 @@ const searchEngine = document.getElementById("sj-search-engine");
 
 const configPromise = fetch("/wispServer.json").then(r => r.json());
 
-async function testWisp(wisp){
-    try{
-        const { default: EpoxyClient } = await import("/epoxy/index.mjs");
-        const transport = new EpoxyClient({ wisp });
-        await transport.init();
-        return wisp;
-    }catch(err){
-        console.warn("[WISP FAILED]", wisp, err);
-        return null;
-    }
+async function createTransport(wispUrl) {
+    const { default: EpoxyClient } = await import("/epoxy/index.mjs");
+    const transport = new EpoxyClient({ wisp: wispUrl });
+    await transport.init();
+    return transport;
 }
 
-async function createTransport(wispUrls){
-    const results = await Promise.all(
-        wispUrls.map(wisp => testWisp(wisp))
-    );
-
-    const working = results.filter(Boolean);
-
-    if(!working.length){
-        throw new Error("No working wisp servers found");
-    }
-
-    const wisp = working[Math.floor(Math.random() * working.length)];
-
+async function getBestTransport(hostname, cfWispUrls, publicWispUrls) {
     const { default: EpoxyClient } = await import("/epoxy/index.mjs");
-    const transport = new EpoxyClient({ wisp });
 
-    await transport.init();
+    const cfWisp = cfWispUrls[Math.floor(Math.random() * cfWispUrls.length)];
+    const cfTransport = new EpoxyClient({ wisp: cfWisp });
+    await cfTransport.init();
+    try {
+        await cfTransport.request(new URL(`https://${hostname}/`), "HEAD", null, [], undefined);
+        return cfTransport;
+    } catch {}
 
-    return transport;
+    const pubWisp = publicWispUrls[Math.floor(Math.random() * publicWispUrls.length)];
+    const pubTransport = new EpoxyClient({ wisp: pubWisp });
+    await pubTransport.init();
+    try {
+        await pubTransport.request(new URL(`https://${hostname}/`), "HEAD", null, [], undefined);
+        return pubTransport;
+    } catch {}
+
+    return null;
 }
 
 const controllerPromise = (async () => {
@@ -47,8 +43,9 @@ const controllerPromise = (async () => {
         return null;
     }
 
-    const { wispUrls } = await configPromise;
-    const transport = await createTransport(wispUrls);
+    const { cfWispUrls } = await configPromise;
+    const initialWisp = cfWispUrls[Math.floor(Math.random() * cfWispUrls.length)];
+    const transport = await createTransport(initialWisp);
 
     const controller = new $scramjetController.Controller({
         serviceworker: (await navigator.serviceWorker.ready).active,
@@ -71,7 +68,7 @@ const controllerPromise = (async () => {
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const [, controller] = await Promise.all([
+    const [config, controller] = await Promise.all([
         configPromise,
         controllerPromise,
     ]);
@@ -79,9 +76,29 @@ form.addEventListener("submit", async (event) => {
     if (!controller) return;
 
     const url = search(address.value, searchEngine.value);
+    let hostname;
+    try {
+        hostname = new URL(url).hostname;
+    } catch {
+        document.getElementById("sj-error").textContent = "Invalid URL.";
+        return;
+    }
+
+    const errorEl = document.getElementById("sj-error");
+    errorEl.textContent = "Connecting...";
+
+    const transport = await getBestTransport(hostname, config.cfWispUrls, config.publicWispUrls);
+    if (!transport) {
+        errorEl.textContent = "Could not connect to " + hostname + " via any server.";
+        return;
+    }
+
+    errorEl.textContent = "";
+    controller.setTransport(transport);
+
     document.getElementById("sj-frame")?.remove();
     const frame = controller.createFrame();
     frame.element.id = "sj-frame";
     document.body.appendChild(frame.element);
-    await window.withTransport(() => frame.go(url));
+    frame.go(url);
 });
