@@ -82,9 +82,12 @@ addEventListener("fetch", e => {
         const id = reqId++;
         inFlightRequests.set(id, { url: e.request.url, startTime: Date.now() });
 
+        const timeout = setTimeout(() => inFlightRequests.delete(id), 30000);
+
         e.respondWith(
             $scramjetController.route(routeTarget)
                 .finally(() => {
+                    clearTimeout(timeout);
                     inFlightRequests.delete(id);
                 })
         );
