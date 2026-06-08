@@ -8,6 +8,21 @@
         "wss://scramjet-server-wisp-5.sigmasigmaonthewallwhoisthe2.workers.dev/wisp/"
     ],
     "publicWispUrls": [
-        "wss://anura.pro/wisp/"
+        "wss://anura.pro/wisp/",
+        "wss://wisp.mercuryworkshop.dev/wisp/",
+        "wss://wisp.ducks.party/wisp/",
+        "wss://wisp.nodemixaholic.com/wisp/",
+        "wss://wisp.kooleyy.com/wisp/",
+        "wss://wisp.unsafeoperator.com/wisp/",
+        "wss://wisp.epoch.net.eu.org/wisp/",
+        "wss://wisp.alu.gay/wisp/",
+        "wss://wisp.helodali.com/wisp/",
+        "wss://anura.pro/wisp/",
+        "wss://wisp.girpex.com/wisp/",
+        "wss://wisp.z1g.dev/wisp/",
+        "wss://wisp.hyperfox.dev/wisp/",
+        "wss://wisp.fnbr.lol/wisp/",
+        "wss://wisp.nebulaproxy.io/wisp/",
+        "wss://wisp.crion.dev/wisp/"
     ]
 }

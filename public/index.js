@@ -12,6 +12,35 @@ async function createTransport(wispUrl) {
     return transport;
 }
 
+async function testWispUrl(url) {
+    return new Promise((resolve) => {
+        const ws = new WebSocket(url);
+        const timeout = setTimeout(() => {
+            ws.close();
+            resolve(false);
+        }, 3000);
+        ws.onopen = () => {
+            clearTimeout(timeout);
+            ws.close();
+            resolve(true);
+        };
+        ws.onerror = () => {
+            clearTimeout(timeout);
+            resolve(false);
+        };
+    });
+}
+
+async function filterWorkingWisps(urls) {
+    const results = await Promise.all(urls.map(async url => ({
+        url,
+        works: await testWispUrl(url),
+    })));
+    const dead = results.filter(r => !r.works).map(r => r.url);
+    const working = results.filter(r => r.works).map(r => r.url);
+    if (dead.length > 0) console.log(`[wisp] dead servers:`, dead);
+    return working;
+}
 function getCachedTransportType(hostname) {
     try {
         const cache = JSON.parse(localStorage.getItem('wisp-cache') || '{}');
@@ -33,7 +62,7 @@ async function getBestTransport(hostname, cfWispUrls, publicWispUrls) {
     const cached = getCachedTransportType(hostname);
 
     const cfWisp = cfWispUrls[Math.floor(Math.random() * cfWispUrls.length)];
-    const pubWisp = publicWispUrls[Math.floor(Math.random() * publicWispUrls.length)];
+    const pubWisp = publicWispUrls.length > 0 ? publicWispUrls[Math.floor(Math.random() * publicWispUrls.length)] : null;
 
     if (cached === 'cf') {
         const transport = new EpoxyClient({ wisp: cfWisp });
@@ -41,7 +70,7 @@ async function getBestTransport(hostname, cfWispUrls, publicWispUrls) {
         return transport;
     }
 
-    if (cached === 'public') {
+    if (cached === 'public' && pubWisp) {
         const transport = new EpoxyClient({ wisp: pubWisp });
         await transport.init();
         return transport;
@@ -55,16 +84,20 @@ async function getBestTransport(hostname, cfWispUrls, publicWispUrls) {
         return cfTransport;
     } catch {}
 
-    const pubTransport = new EpoxyClient({ wisp: pubWisp });
-    await pubTransport.init();
-    try {
-        await pubTransport.request(new URL(`https://${hostname}/`), "HEAD", null, [], undefined);
-        setCachedTransportType(hostname, 'public');
-        return pubTransport;
-    } catch {}
+    if (pubWisp) {
+        const pubTransport = new EpoxyClient({ wisp: pubWisp });
+        await pubTransport.init();
+        try {
+            await pubTransport.request(new URL(`https://${hostname}/`), "HEAD", null, [], undefined);
+            setCachedTransportType(hostname, 'public');
+            return pubTransport;
+        } catch {}
+    }
 
     return null;
 }
+
+let workingPublicWisps = [];
 
 const controllerPromise = (async () => {
     await navigator.serviceWorker.register("/sw.js", { scope: "/" });
@@ -75,7 +108,12 @@ const controllerPromise = (async () => {
         return null;
     }
 
-    const { cfWispUrls } = await configPromise;
+    const { cfWispUrls, publicWispUrls } = await configPromise;
+
+    // test all public wisps in parallel at startup
+    workingPublicWisps = await filterWorkingWisps(publicWispUrls);
+    console.log(`[wisp] ${workingPublicWisps.length}/${publicWispUrls.length} public servers online`);
+
     const initialWisp = cfWispUrls[Math.floor(Math.random() * cfWispUrls.length)];
     const transport = await createTransport(initialWisp);
 
@@ -119,7 +157,7 @@ form.addEventListener("submit", async (event) => {
     const errorEl = document.getElementById("sj-error");
     errorEl.textContent = "Connecting...";
 
-    const transport = await getBestTransport(hostname, config.cfWispUrls, config.publicWispUrls);
+    const transport = await getBestTransport(hostname, config.cfWispUrls, workingPublicWisps);
     if (!transport) {
         errorEl.textContent = "Could not connect to " + hostname + " via any server.";
         return;
