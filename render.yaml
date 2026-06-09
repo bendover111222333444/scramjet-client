@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: scramjet-client
+    env: static
+    staticPublishPath: public
+    headers:
+      - path: /*
+        name: Cross-Origin-Opener-Policy
+        value: same-origin
+      - path: /*
+        name: Cross-Origin-Embedder-Policy
+        value: require-corp
+    buildCommand: pnpm install --no-frozen-lockfile && pnpm build
