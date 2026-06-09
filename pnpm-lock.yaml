@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bendover111222333444/epoxy-transport':
-        specifier: 3.0.4
-        version: 3.0.4
+        specifier: 3.0.5
+        version: 3.0.5
       '@bendover111222333444/scramjet-controller':
         specifier: 0.0.34
         version: 0.0.34(@mercuryworkshop/scramjet@2.0.67-alpha.1)
@@ -42,8 +42,8 @@ importers:
 
 packages:
 
-  '@bendover111222333444/epoxy-transport@3.0.4':
-    resolution: {integrity: sha512-upQ9Rev4u++Vz/hdx99VYE9vSvWHDbfeK6hf3ywLhV9uESNReq1xUbU9A+cfhb+TbD2Qg22dzSxcbrwV+qE68w==}
+  '@bendover111222333444/epoxy-transport@3.0.5':
+    resolution: {integrity: sha512-IMCejvGRn25uJXbwzVA6VGIoH3ahqbwZMQ8QtyrydTE7hgjH0obAiT+4voDe0OLrDnWVyw9zsZxmYg6xhYRiAQ==}
 
   '@bendover111222333444/scramjet-controller@0.0.34':
     resolution: {integrity: sha512-ZSxk9NtJAEah4KcsQffWaVWVzPPQ7YlDH8T1h8idVjlOrUq5VXEnlKUIk6g6OZcS40D4Oz7Jef8rzZnYEQQDgQ==}
@@ -759,7 +759,7 @@ packages:
 
 snapshots:
 
-  '@bendover111222333444/epoxy-transport@3.0.4':
+  '@bendover111222333444/epoxy-transport@3.0.5':
     dependencies:
       '@mercuryworkshop/epoxy-tls': 2.1.19-1
 
